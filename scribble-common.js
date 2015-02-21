@@ -2,7 +2,8 @@
 
 // Page Parameters ------------------------------------------------------------
 
-var page_query_string = location.search.substring(1);
+var page_query_string =
+  (location.href.search(/\?([^#]+)(?:#|$)/) >= 0) && RegExp.$1;
 
 var page_args =
   ((function(){
@@ -31,16 +32,13 @@ function MergePageArgsIntoLink(a) {
 }
 
 function MergePageArgsIntoUrl(href) {
-    var mtch = href.match(/^([^?#]*)(?:\?([^#]*))?(#.*)?$/);
-    if (mtch == undefined) { // I think this never happens
-        return "?" + page_query_string;
-    }
-    if (!mtch[2]) {
-        return mtch[1] + "?" + page_query_string + (mtch[3] || "");
-    }
+  href.search(/^([^?#]*)(?:\?([^#]*))?(#.*)?$/);
+  if (RegExp.$2.length == 0) {
+    return RegExp.$1 + "?" + page_query_string + RegExp.$3;
+  } else {
     // need to merge here, precedence to arguments that exist in `a'
     var i, j;
-    var prefix = mtch[1], str = mtch[2] || "", suffix = mtch[3] || "";
+    var prefix = RegExp.$1, str = RegExp.$2, suffix = RegExp.$3;
     var args = str.split(/[&;]/);
     for (i=0; i<args.length; i++) {
       j = args[i].indexOf('=');
@@ -54,6 +52,7 @@ function MergePageArgsIntoUrl(href) {
       if (!exists) str += "&" + page_args[i][0] + "=" + page_args[i][1];
     }
     return prefix + "?" + str + suffix;
+  }
 }
 
 // Cookies --------------------------------------------------------------------
